@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+        <title>JSON Diff</title>
+
+        <!-- Bootstrap -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+        <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <![endif]-->
+    </head>
+    <body>
+        <div class="container">
+        <h1>JSON Diff</h1>
+            <form>
+                <div class="form-group">
+                    <label for="base-json">Base JSON</label>
+                    <textarea class="form-control" rows="3" name="base_json" id="base-json"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="new-json">New JSON</label>
+                    <textarea class="form-control" rows="3" name="new_json" id="new-json"></textarea>
+                </div>
+                <button class="btn btn-default" type="submit">Compare</button>
+            </form>
+            <div >
+                <pre class="json" id="result"></pre>
+            </div>
+        </div>
+
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+        <script type="text/javascript">
+        (function($) {
+            function diff(base_data,new_data) {
+                var result = {};
+                for (i in base_data) {
+                    if (!(i in new_data)) {
+                        if ($.type(base_data[i]) == 'object') {
+                            result[i] = base_data[i];    
+                        } else {
+                            result[i] = "<em style='color:red'>[Removed] " + base_data[i]+"</em>";
+                        }
+                    } else {
+                        for (j in new_data) {
+                            if (!(j in base_data)) {
+                                if ($.type(base_data[i]) == 'object') {
+                                    result[j] = new_data[j];
+                                } else {
+                                    result[j] = "<em style='color:green'>[Added] " + new_data[j]+"</em>";    
+                                }
+                            } else {
+                                if (base_data[i] != new_data[i]) {
+                                    if ($.type(base_data[i]) == 'object') { 
+                                        result[i] = diff(base_data[i],new_data[i]);
+                                    } else {
+                                        result[i] = "<em style='color:blue'>[Changed] " + base_data[i] + " => " + new_data[i]+"</em>";
+                                    }
+                                } else {
+                                    if ($.type(base_data[i]) == 'object') {
+                                        result[i] = diff(base_data[i]);    
+                                    } else {
+                                        result[i] = base_data[i];
+                                    }          
+                                }
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+
+            function formatJSON(data,tab_size = 4) {
+                var jsonString = "{\n";
+                var spaces = "";
+                for(x=0;x<tab_size;x++) {
+                    spaces += " ";
+                }
+                for (i in data) {
+                    console.log($.type(data[i]));
+                    if ($.type(data[i]) == 'object') {
+                       jsonString += spaces + i + ":" + formatJSON(data[i],tab_size * 2) + ",\n"; 
+                    } else {
+                        jsonString += spaces + i + ":" + data[i] + ",\n"; 
+                    }
+                }
+                jsonString += "}";
+                return jsonString;
+            }
+
+            $("form").submit(function(e){
+                e.preventDefault();
+                var base_data = $.parseJSON($("#base-json").val());
+                var new_data  = $.parseJSON($("#new-json").val());
+
+                var res = diff(base_data,new_data);
+                $("#result").html(formatJSON(res));
+                //console.log(res);
+            });
+            
+        })(jQuery);
+        </script>
+    </body>
+</html>

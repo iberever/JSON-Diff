@@ -64,7 +64,7 @@
         return jsonString;
     }
 
-    $("button").click(function(e){
+    $("#button").click(function(e){
         e.preventDefault();
         var base_data = $.parseJSON($("#base-json").val());
         var new_data  = $.parseJSON($("#new-json").val());

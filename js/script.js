@@ -46,7 +46,8 @@
         return result;
     }
 
-    function formatJSON(data,tab_size = 4) {
+    function formatJSON(data,tab_size) {
+        tab_size = typeof tab_size !== 'undefined' ? tab_size : 4;
         var jsonString = "{\n";
         var spaces = "";
         for(x=0;x<tab_size;x++) {
